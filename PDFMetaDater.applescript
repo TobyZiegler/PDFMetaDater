@@ -4,12 +4,13 @@
 # Applescript to change creation and modification dates of a PDF to match internal properties.
 #
 # Created by Toby Ziegler, February 22 2023
-# Last updated by Toby on March 19, 2023
+# Last updated by Toby on March 26, 2023
 #
 #
-# Designating this script as version 0.5.2
+# Designating this script as version 0.5.3
 #
 --current version message:
+--rearranged to move change handler to be accessible both dnd and run
 --more notes on what next
 
 # Files may be dialog designated or drag-and-drop, beginning dnd process
