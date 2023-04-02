@@ -1,5 +1,15 @@
-(* Applescript to change creation and modification dates of a PDF to match internal properties *)
-
+#
+# PDFMetaDater
+#
+# Applescript to change creation and modification dates of a PDF to match internal properties.
+#
+# Created by Toby Ziegler, February 22 2023
+# Last updated by Toby on March 7, 2023
+#
+#
+# Designating this script as version 0.2
+#
+#
 
 set sourceFile to setFile()
 --set targetFolder to setFolder("target")
