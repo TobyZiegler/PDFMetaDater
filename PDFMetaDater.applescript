@@ -7,8 +7,13 @@
 # Last updated by Toby on March 8, 2023
 #
 #
-# Designating this script as version 0.2
-# Reading metadata looks like it works, now for the writing
+# Designating this script as version 0.2.2
+-- version notes:
+-- Turns out the mdls command accesses a lot of data, but not the data shown in the properties from inside Adobe Acrobat. Instead, it is showing system properties.
+#
+
+# Script now relies on ExifTool being installed:
+# brew install exiftool
 #
 
 # initialize variables -- no global variables yet, delete if never
@@ -19,8 +24,8 @@
 
 set sourceFile to setFile()
 --set targetFolder to setFolder("target")
-set metaCreateDate to readDate(sourceFile, "Creation")
-set metaModDate to readDate(sourceFile, "Modification")
+set metaCreateDate to readDate(sourceFile, "CreateDate")
+set metaModDate to readDate(sourceFile, "ModifyDate")
 changeDates(metaCreateDate, metaModDate)
 
 confirm(sourceFile)
@@ -35,10 +40,15 @@ on readDate(theFile, theType)
 	set thePath to POSIX path of theFile
 	
 	--the shell command "mdls -name" reads a specific metadata by name
-	set theScript to "mdls -name kMDItemContent" & theType & "Date " & thePath
+	#set theScript to "mdls -name kMDItemContent" & theType & "Date " & thePath
+	(* keeping the mdls text for now. It works, but just doesn't get the info we want *)
+	
+	--the shell command "exiftool" reads the named property
+	set theScript to "exiftool -" & theType & " " & thePath
+	log "theScript: " & theScript
 	
 	--after building the script, just run it!
-	set theMetaDate to do shell script theScript
+	set theMetaDate to do shell script theScript -- throws sh: exiftool: command not found number 127, but script runs perfectly in terminal
 	
 	--dates arrive in metadata format and must be parsed
 	
@@ -47,19 +57,32 @@ on readDate(theFile, theType)
 	#
 	# Note:
 	#
-	# kMDItemContentCreationDate		= creation date, Btime
-	# kMDItemContentModificationDate	= modification date, mtime
-	# kMDItemDateAdded				= added date
-	# kMDItemFSContentChangeDate	= file system change date, ctime
-	# kMDItemFSCreationDate			= file system creation date
-	# kMDItemLastUsedDate			= access date, atime
+	# need three exiftool dates:
+	# CreateDate
+	# MetadataDate
+	# ModifyDate
+	#
+	# these correspond to:
+	# FileInodeChangeDate (?)
+	# FileAccessDate
+	# FileModifyDate
 	#
 	
 end readDate
 
 on changeDates(createDate, modDate)
 	
-	--use the shell command "touch" or 
+	--use the shell command "touch" or something?
+	
+	--touch -mt 202303110700.00 /path/to/file--for changing the modification date
+	--
+	
+	(*
+	Use setFile to change the origination date:
+	SetFile -d '12/31/1999 23:59:59' file.txt
+            MM dd yyyy hh mm ss  fileName
+			*)
+	
 	
 end changeDates
 
