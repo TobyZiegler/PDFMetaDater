@@ -7,8 +7,9 @@
 # Last updated by Toby on March 15, 2023
 #
 #
-# Designating this script as version 0.3.2
--- Exiftool working with PATH addition.
+# Designating this script as version 0.3.3
+-- Internal properties can be obtained with ExifTool
+-- Now moving forward with writing to the file
 #
 
 #
@@ -23,9 +24,11 @@
 
 
 set sourceFile to setFile()
---set targetFolder to setFolder("target")
+
 set metaCreateDate to readDate(sourceFile, "CreateDate")
+
 set metaModDate to readDate(sourceFile, "ModifyDate")
+
 changeDates(metaCreateDate, metaModDate)
 
 confirm(sourceFile)
@@ -39,22 +42,23 @@ on readDate(theFile, theType)
 	--the chosen file path comes as an alias and must be converted
 	set thePath to POSIX path of theFile
 	
-	--the shell command "mdls -name" reads a specific metadata by name
-	(* set theScript to "mdls -name kMDItemContent" & theType & "Date " & thePath *)
-	## mdls does not return the same data as properties command from inside acrobat
-	
 	--the shell command "exiftool" reads the named property
+	--exiftool is not recognized without setting the path
 	set theScript to "PATH=/usr/local/bin:$PATH; " & "exiftool -" & theType & " " & thePath
 	## will probably need to check if exiftool is installed, then offer to install it if not
 	
 	
 	--after building the script, just run it!
 	set theMetaDate to do shell script theScript
-	--> error "sh: exiftool: command not found" number 127
-	--yet the command runs just fine in a terminal instance?!?
 	log "MetaDate = " & theMetaDate
 	
 	--dates arrive in metadata format and must be parsed
+	--since we will use touch later on, that should be the target format
+	
+	(* Formats:
+	Create Date                     : 2018:06:07 14:57:15-05:00
+	Modify Date                     : 2018:06:07 14:57:15-05:00
+	*)
 	
 	return theMetaDate
 	
@@ -63,13 +67,13 @@ on readDate(theFile, theType)
 	
 	need three dates:
 	  CreateDate
-	  MetadataDate
 	  ModifyDate
+	  MetadataDate
 	
 	these correspond to exiftool values for:
 	  Create Date
-	  FileAccessDate??
 	  Modify Date
+	  FileAccessDate??
 	
 	*)
 	
@@ -77,7 +81,18 @@ end readDate
 
 on changeDates(createDate, modDate)
 	
-	--use the shell command "touch" or 
+	--use the shell command "touch" or "SetFile"
+	--SetFile -d for creation and SetFile -m for modification
+	--Format: SetFile -d mm/dd/[yy]yy [hh:mm[:ss] [AM | PM]] filelocation
+	##turns out SetFile is deprecated
+	
+	--touch to change the creation date
+	--touch -mt yyyymmddhhmm [pathtofile][filename]
+	log "Create: " & createDate
+	
+	--touch to change the modified date
+	--touch -t yyyymmddhhmm [pathtofile][filename]
+	log "Modify: " & modDate
 	
 end changeDates
 
