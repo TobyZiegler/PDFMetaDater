@@ -7,8 +7,8 @@
 # Last updated by Toby on March 15, 2023
 #
 #
-# Designating this script as version 0.3.1
--- Still troubles with exiftool throwing errors.
+# Designating this script as version 0.3.2
+-- Exiftool working with PATH addition.
 #
 
 #
@@ -40,34 +40,38 @@ on readDate(theFile, theType)
 	set thePath to POSIX path of theFile
 	
 	--the shell command "mdls -name" reads a specific metadata by name
-	#set theScript to "mdls -name kMDItemContent" & theType & "Date " & thePath
-	--mdls does not return the same data as properties command from inside acrobat
+	(* set theScript to "mdls -name kMDItemContent" & theType & "Date " & thePath *)
+	## mdls does not return the same data as properties command from inside acrobat
 	
 	--the shell command "exiftool" reads the named property
-	set theScript to "exiftool -" & theType & " " & thePath
+	set theScript to "PATH=/usr/local/bin:$PATH; " & "exiftool -" & theType & " " & thePath
+	## will probably need to check if exiftool is installed, then offer to install it if not
+	
 	
 	--after building the script, just run it!
 	set theMetaDate to do shell script theScript
 	--> error "sh: exiftool: command not found" number 127
 	--yet the command runs just fine in a terminal instance?!?
+	log "MetaDate = " & theMetaDate
 	
 	--dates arrive in metadata format and must be parsed
 	
 	return theMetaDate
 	
-	#
-	# Note:
-	#
-	# need three dates:
-	# CreateDate
-	# MetadataDate
-	# ModifyDate
-	#
-	# these correspond to:
-	# FileInodeChangeDate (?)
-	# FileAccessDate
-	# FileModifyDate
-	#
+	(*
+	Note:
+	
+	need three dates:
+	  CreateDate
+	  MetadataDate
+	  ModifyDate
+	
+	these correspond to exiftool values for:
+	  Create Date
+	  FileAccessDate??
+	  Modify Date
+	
+	*)
 	
 end readDate
 
@@ -95,13 +99,15 @@ on confirm(theSource)
 	set theConfirmation to do shell script theCheckScript
 	log "Confirmation: " & linefeed & theConfirmation
 	
-	#
-	# Note:
-	#
-	# atime = Access Time = when file was last opened
-	# mtime = Modify Time = when file was last changed
-	# ctime = Change Time = when file's meta was last changed, including permissions, etc.
-	# btime = Birth Time = when file first created
-	#
+	(*
+	Note:
+	
+	for the stat command,
+	  atime = Access Time = when file was last opened
+	  mtime = Modify Time = when file was last changed
+	  ctime = Change Time = when file's meta was last changed, including permissions, etc.
+	  btime = Birth Time = when file first created
+	
+	*)
 	
 end confirm
