@@ -7,9 +7,10 @@
 # Last updated by Toby on March 15, 2023
 #
 #
-# Designating this script as version 0.3.3
+# Designating this script as version 0.3.4
 -- Internal properties can be obtained with ExifTool
--- Now moving forward with writing to the file
+-- File creation and modification dates will use touch command
+-- Dates are converted to touch-friendly values
 #
 
 #
@@ -59,6 +60,31 @@ on readDate(theFile, theType)
 	Create Date                     : 2018:06:07 14:57:15-05:00
 	Modify Date                     : 2018:06:07 14:57:15-05:00
 	*)
+	
+	-- Convert the date string to touch format (YYYYMMDDhhmm.ss)
+	-- Start by adjusting for GMT
+	set theHour to text 46 thru 47 of theMetaDate as number
+	log "the Hour: " & theHour
+	set theGMTchange to text 54 thru 56 of theMetaDate as number
+	log "the GMT: " & theGMTchange
+	set theNewHour to theHour + theGMTchange
+	log "the Result: " & theNewHour
+	
+	--the new value could easily be a single digit, test and modify if so
+	set digitCount to the length of (theNewHour as string)
+	if digitCount is less than 2 then
+		set theNewHour to "0" & theNewHour
+	end if
+	
+	
+	--first try:
+	--set newDate to text 35 thru 38 of theMetaDate & text 40 thru 41 of theMetaDate & text 43 thru 44 of theMetaDate & text 46 thru 47 of theMetaDate & text 49 thru 50 of theMetaDate & "." & text 52 thru 53 of theMetaDate
+	
+	--second try with GMT adjustment
+	set newDate to text 35 thru 38 of theMetaDate & text 40 thru 41 of theMetaDate & text 43 thru 44 of theMetaDate & theNewHour & text 49 thru 50 of theMetaDate & "." & text 52 thru 53 of theMetaDate
+	log newDate
+	
+	
 	
 	return theMetaDate
 	
