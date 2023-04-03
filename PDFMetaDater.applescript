@@ -4,13 +4,14 @@
 # Applescript to change creation and modification dates of a PDF to match internal properties.
 #
 # Created by Toby Ziegler, February 22 2023
-# Last updated by Toby on March 8, 2023
+# Last updated by Toby on March 15, 2023
 #
 #
-# Designating this script as version 0.3
--- Turns out the mdls command accesses a lot of data, # but not the data shown in the properties from inside Adobe Acrobat.
+# Designating this script as version 0.3.1
+-- Still troubles with exiftool throwing errors.
 #
 
+#
 # Script now relies on ExifTool being installed:
 # brew install exiftool
 #
@@ -40,12 +41,15 @@ on readDate(theFile, theType)
 	
 	--the shell command "mdls -name" reads a specific metadata by name
 	#set theScript to "mdls -name kMDItemContent" & theType & "Date " & thePath
+	--mdls does not return the same data as properties command from inside acrobat
 	
 	--the shell command "exiftool" reads the named property
 	set theScript to "exiftool -" & theType & " " & thePath
 	
 	--after building the script, just run it!
 	set theMetaDate to do shell script theScript
+	--> error "sh: exiftool: command not found" number 127
+	--yet the command runs just fine in a terminal instance?!?
 	
 	--dates arrive in metadata format and must be parsed
 	
