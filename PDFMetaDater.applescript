@@ -7,10 +7,10 @@
 # Last updated by Toby on March 19, 2023
 #
 #
-# Designating this script as version 0.5.1
+# Designating this script as version 0.5.2
 #
 --current version message:
---rearranged to move change handler to be accessible both drag-and-drop and run
+--more notes on what next
 
 # Files may be dialog designated or drag-and-drop, beginning dnd process
 # Internal properties can be obtained with ExifTool
@@ -33,6 +33,8 @@ property theExtensionsToProcess : {"pdf"} -- I.e. {"txt", "text", "jpg", "jpeg"}
 
 ########## BEGIN MAIN ##########
 
+--need read prefs?
+--what prefs? what for?
 
 set selectedFile to setFile()
 
