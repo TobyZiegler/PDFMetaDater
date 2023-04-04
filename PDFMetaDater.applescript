@@ -4,14 +4,18 @@
 # Applescript to change creation and modification dates of a PDF to match internal properties.
 #
 # Created by Toby Ziegler, February 22 2023
-# Last updated by Toby on March 17, 2023
+# Last updated by Toby on March 19, 2023
 #
 #
-# Designating this script as version 0.5
--- Files may be dialog designated or drag-and-drop, beginning dnd process
--- Internal properties can be obtained with ExifTool
--- Dates are converted to touch-friendly values
--- File creation and modification dates use touch command
+# Designating this script as version 0.5.1
+#
+--current version message:
+--rearranged to move change handler to be accessible both drag-and-drop and run
+
+# Files may be dialog designated or drag-and-drop, beginning dnd process
+# Internal properties can be obtained with ExifTool
+# Dates are converted to touch-friendly values
+# File creation and modification dates use touch command
 #
 
 #
@@ -19,21 +23,45 @@
 # brew install exiftool
 #
 
-# initialize variables -- no global variables yet, delete if never
+-- currently limmited to PDFs, unknown how well exiftool may work with other formats
+property theFileTypesToProcess : {"PDF"}
+property theExtensionsToProcess : {"pdf"} -- I.e. {"txt", "text", "jpg", "jpeg"}, NOT: {".txt", ".text", ".jpg", ".jpeg"}
+--killing property type, not needed I think? if needed, will need to re-reference source
+--property theTypeIdentifiersToProcess : {} -- I.e. {"public.jpeg", "public.tiff", "public.png"}
+
 
 
 ########## BEGIN MAIN ##########
 
 
+set selectedFile to setFile()
+
+changeFile(selectedFile)
+
+########### END MAIN ###########
+
+on changeFile(sourceFile)
+	
+	--confirm starting values, remove for completed code
+	confirm(sourceFile)
+	
+	set metaCreateDate to readDate(sourceFile, "CreateDate")
+	
+	set metaModDate to readDate(sourceFile, "ModifyDate")
+	
+	changeDates(sourceFile, metaCreateDate, metaModDate)
+	
+	--confirm ending values, remove for completed code
+	confirm(sourceFile)
+	
+end changeFile
+
+
+
+
 (* Credit and Reference for drop code:
 https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/ProcessDroppedFilesandFolders.html#//apple_ref/doc/uid/TP40016239-CH53-SW1
 *)
-
--- currently limmited to PDFs, unknown how well exiftool may work with other formats
-property theFileTypesToProcess : {"PDF"}
-property theExtensionsToProcess : {"pdf"} -- I.e. {"txt", "text", "jpg", "jpeg"}, NOT: {".txt", ".text", ".jpg", ".jpeg"}
---killing property type, not needed I think?
---property theTypeIdentifiersToProcess : {} -- I.e. {"public.jpeg", "public.tiff", "public.png"}
 
 on open theDroppedItems
 	repeat with a from 1 to count of theDroppedItems
@@ -71,30 +99,18 @@ on processFile(theItem)
 	tell application "System Events"
 		set theExtension to name extension of theItem
 		set theFileType to file type of theItem
-		set theTypeIdentifier to type identifier of theItem
 	end tell
-	if ((theFileTypesToProcess contains theFileType) or (theExtensionsToProcess contains theExtension) or (theTypeIdentifiersToProcess contains theTypeIdentifier)) then
+	if ((theFileTypesToProcess contains theFileType) or (theExtensionsToProcess contains theExtension)) then
+		
 		-- Add file processing code here
+		changeFile(theItem)
+		
 		display dialog theItem as string
 	end if
 end processFile
 
-set sourceFile to setFile()
-
---confirm starting values
-confirm(sourceFile)
-
-set metaCreateDate to readDate(sourceFile, "CreateDate")
-
-set metaModDate to readDate(sourceFile, "ModifyDate")
-
-changeDates(sourceFile, metaCreateDate, metaModDate)
-
---confirm ending values
-confirm(sourceFile)
 
 
-########### END MAIN ###########
 
 
 on readDate(theFile, theType)
