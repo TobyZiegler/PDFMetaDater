@@ -7,7 +7,8 @@
 # Last updated by Toby on March 17, 2023
 #
 #
-# Designating this script as version 0.4
+# Designating this script as version 0.5
+-- Files may be dialog designated or drag-and-drop, beginning dnd process
 -- Internal properties can be obtained with ExifTool
 -- Dates are converted to touch-friendly values
 -- File creation and modification dates use touch command
@@ -23,6 +24,60 @@
 
 ########## BEGIN MAIN ##########
 
+
+(* Credit and Reference for drop code:
+https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/ProcessDroppedFilesandFolders.html#//apple_ref/doc/uid/TP40016239-CH53-SW1
+*)
+
+-- currently limmited to PDFs, unknown how well exiftool may work with other formats
+property theFileTypesToProcess : {"PDF"}
+property theExtensionsToProcess : {"pdf"} -- I.e. {"txt", "text", "jpg", "jpeg"}, NOT: {".txt", ".text", ".jpg", ".jpeg"}
+--killing property type, not needed I think?
+--property theTypeIdentifiersToProcess : {} -- I.e. {"public.jpeg", "public.tiff", "public.png"}
+
+on open theDroppedItems
+	repeat with a from 1 to count of theDroppedItems
+		set theCurrentItem to item a of theDroppedItems
+		tell application "Finder"
+			set isFolder to folder (theCurrentItem as string) exists
+		end tell
+		
+		-- Process a dropped folder
+		if isFolder = true then
+			processFolder(theCurrentItem)
+			
+			-- Process a dropped file
+		else
+			processFile(theCurrentItem)
+		end if
+	end repeat
+end open
+
+on processFolder(theFolder)
+	-- NOTE: The variable theFolder is a folder reference in AppleScript alias format
+	-- Retrieve a list of any visible items in the folder
+	set theFolderItems to list folder theFolder without invisibles
+	
+	-- Loop through the visible folder items
+	repeat with a from 1 to count of theFolderItems
+		set theCurrentItem to ((theFolder as string) & (item a of theFolderItems)) as alias
+		open {theCurrentItem}
+	end repeat
+	-- Add additional folder processing code here
+end processFolder
+
+on processFile(theItem)
+	-- NOTE: variable theItem is a file reference in AppleScript alias format
+	tell application "System Events"
+		set theExtension to name extension of theItem
+		set theFileType to file type of theItem
+		set theTypeIdentifier to type identifier of theItem
+	end tell
+	if ((theFileTypesToProcess contains theFileType) or (theExtensionsToProcess contains theExtension) or (theTypeIdentifiersToProcess contains theTypeIdentifier)) then
+		-- Add file processing code here
+		display dialog theItem as string
+	end if
+end processFile
 
 set sourceFile to setFile()
 
